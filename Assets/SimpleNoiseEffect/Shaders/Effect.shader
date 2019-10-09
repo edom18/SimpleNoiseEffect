@@ -5,9 +5,7 @@
         _MainTex ("Texture", 2D) = "white" {}
         _PointSize ("Point size", Float) = 0.3
         _Intensity ("Intensity", Float) = 1.0
-        _Height ("Height", Float) = 1.5
-        _Fit ("Fit", Range(0, 1)) = 0.0
-        _OffsetY ("Offset Y", Float) = 2.0
+        _Progress ("Progress", Range(0, 1)) = 0.0
         _Rotate ("Rotate", Float) = 10.0
         _Scale ("Scale", Float) = 3.0
     }
@@ -47,8 +45,7 @@
             fixed _PointSize;
             fixed _Intensity;
             fixed _Height;
-            fixed _Fit;
-            fixed _OffsetY;
+            fixed _Progress;
             fixed _Rotate;
             fixed _Scale;
 
@@ -72,20 +69,18 @@
                 v2f o;
 
                 float3 pos = v.vertex.xyz;
-                float sc = 1.0 + _Scale * _Fit;
+                float sc = _Scale;
 
-                pos.xz = mul(pos.xz, float2x2(sc, 0, 0, sc));
-                pos.xz = mul(pos.xz, rot(_Fit * PI2 * _Rotate));
-                pos = CurlNoise(pos * 0.3);
+                pos.xz = mul(pos.xz, rot(_Progress * PI2 * _Rotate));
+                pos = CurlNoise(pos * sc);
 
-                v.vertex.xyz += (pos * 2.0 - 1.0) * _Fit;
-                v.vertex.y += _Fit * _OffsetY;
+                v.vertex.xyz += ((pos * 2.0 - 1.0) * _Progress) * _Intensity;
 
                 o.vertex = UnityObjectToClipPos(v.vertex);
 
                 o.uv = TRANSFORM_TEX(v.uv, _MainTex);
-                o.size = _PointSize;
-                o.alpha = 1.0 - _Fit;
+                o.size = _PointSize * (1.0 - _Progress * _Progress);
+                o.alpha = 1.0 - _Progress;
 
                 return o;
             }
