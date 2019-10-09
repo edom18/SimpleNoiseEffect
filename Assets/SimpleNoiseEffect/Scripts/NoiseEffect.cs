@@ -24,9 +24,80 @@ public class NoiseEffect : MonoBehaviour
     private int _scaleId = 0;
     private int _rotateId = 0;
 
+    private Coroutine _coroutine = null;
+
     private void Awake()
     {
         Initialize();
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.S))
+        {
+            if (_coroutine != null)
+            {
+                StopCoroutine(_coroutine);
+            }
+
+            _coroutine = StartCoroutine(StartAnimation(2f));
+        }
+        
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            if (_coroutine != null)
+            {
+                StopCoroutine(_coroutine);
+            }
+
+            _coroutine = StartCoroutine(EndAnimation(2f));
+        }
+    }
+
+    private IEnumerator StartAnimation(float duration)
+    {
+        float time = 0;
+
+        while (true)
+        {
+            if (time >= duration)
+            {
+                break;
+            }
+
+            _progress = time / duration;
+            UpdateProperties();
+
+            yield return null;
+
+            time += Time.deltaTime;
+        }
+
+        _progress = 1f;
+        UpdateProperties();
+    }
+
+    private IEnumerator EndAnimation(float duration)
+    {
+        float time = 0;
+
+        while (true)
+        {
+            if (time >= duration)
+            {
+                break;
+            }
+
+            _progress = 1f - (time / duration);
+            UpdateProperties();
+
+            yield return null;
+
+            time += Time.deltaTime;
+        }
+
+        _progress = 0f;
+        UpdateProperties();
     }
 
     private void OnValidate()
