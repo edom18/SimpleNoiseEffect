@@ -76,7 +76,7 @@
 
                 pos.xz = mul(pos.xz, float2x2(sc, 0, 0, sc));
                 pos.xz = mul(pos.xz, rot(_Fit * PI2 * _Rotate));
-                pos = Pnoise(pos * 5.0);
+                pos = CurlNoise(pos * 0.3);
 
                 v.vertex.xyz += (pos * 2.0 - 1.0) * _Fit;
                 v.vertex.y += _Fit * _OffsetY;
