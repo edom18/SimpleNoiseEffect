@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public struct Particle
 {
@@ -13,8 +14,6 @@ public struct Particle
 
 public class ParticleEffect : MonoBehaviour
 {
-    private const int MAX_VERTICES_IN_MESH = 65534;
-
     [SerializeField]
     private ComputeShader _computeShader = null;
 
@@ -43,13 +42,14 @@ public class ParticleEffect : MonoBehaviour
     #endregion ### Noise Parameters ###
 
     private Material _material = null;
-    private Mesh _combinedMesh = null;
     private ComputeBuffer _particlesBuf = null;
+    private CommandBuffer _commandBuf = null;
     private int _kernelIndex = 0;
 
     private void Start()
     {
         Initialize();
+        Camera.main.AddCommandBuffer(CameraEvent.BeforeImageEffects, _commandBuf);
     }
 
     private void Update()
@@ -68,13 +68,9 @@ public class ParticleEffect : MonoBehaviour
         _material.SetFloat("_Scale", 0.1f);
         _material.color = new Color(0.2f, 0.5f, 1f);
 
-        // Calculate how many mesh can be included in one mesh.
-        int particleNumPerMesh = MAX_VERTICES_IN_MESH / _mesh.vertexCount;
-        int meshNum = (int)Mathf.Ceil((float)_maxParticleNum / particleNumPerMesh);
+        _commandBuf = new CommandBuffer();
+        _commandBuf.DrawProcedural(Matrix4x4.identity, _material, 0, MeshTopology.Points, _maxParticleNum);
 
-        _combinedMesh = GenerateCombinedMesh(_mesh, particleNumPerMesh);
-
-        // Allocate a buffer for the compute shader.
         _particlesBuf = new ComputeBuffer(_maxParticleNum, Marshal.SizeOf(typeof(Particle)));
 
         Particle[] particles = GenerateParticles(_maxParticleNum);
@@ -94,50 +90,6 @@ public class ParticleEffect : MonoBehaviour
         _computeShader.Dispatch(_kernelIndex, _maxParticleNum / 8, 1, 1);
 
         _material.SetBuffer("_Particles", _particlesBuf);
-        Graphics.DrawMesh(_combinedMesh, transform.position, transform.rotation, _material, 0);
-    }
-
-    private Mesh GenerateCombinedMesh(Mesh baseMesh, int num)
-    {
-        // UnityEngine.Assertions.Assert.IsTrue(baseMesh.vertexCount * _maxParticleNum <= MAX_VERTICES_IN_MESH);
-
-        int[] meshIndices = baseMesh.GetIndices(0);
-        int indNum = meshIndices.Length;
-
-        int[] indices = new int[num * indNum];
-
-        List<Vector2> uv0 = new List<Vector2>();
-        List<Vector2> uv1 = new List<Vector2>();
-        List<Vector3> vertices = new List<Vector3>();
-        List<Vector3> normals = new List<Vector3>();
-        List<Vector4> tangents = new List<Vector4>();
-
-        for (int id = 0; id < num; id++)
-        {
-            vertices.AddRange(baseMesh.vertices);
-            tangents.AddRange(baseMesh.tangents);
-            normals.AddRange(baseMesh.normals);
-            uv0.AddRange(baseMesh.uv);
-
-            for (int n = 0; n < indNum; n++)
-            {
-                indices[id * indNum + n] = id * baseMesh.vertexCount + meshIndices[n];
-            }
-
-            for (int u = 0; u < _mesh.uv.Length; u++)
-            {
-                uv1.Add(new Vector2(id, id));
-            }
-        }
-
-        Mesh mesh = new Mesh();
-        mesh.SetVertices(vertices);
-        mesh.SetUVs(0, uv0);
-        mesh.SetUVs(1, uv1);
-        mesh.SetTangents(tangents);
-        mesh.SetIndices(indices, MeshTopology.Triangles, 0);
-
-        return mesh;
     }
 
     private Particle[] GenerateParticles(int particleNum)

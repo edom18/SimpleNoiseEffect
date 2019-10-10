@@ -29,12 +29,14 @@
                 float4 vertex : POSITION;
                 float2 uv : TEXCOORD0;
                 float2 uv1 : TEXCOORD1;
+                uint id: SV_VertexID;
             };
 
             struct v2f
             {
                 float2 uv : TEXCOORD0;
                 float4 vertex : SV_POSITION;
+                float psize : PSIZE;
             };
 
             sampler2D _MainTex;
@@ -44,19 +46,15 @@
 
             StructuredBuffer<Particle> _Particles;
 
-            inline int GetId(float2 uv)
-            {
-                return (int)(uv.x + 0.5);
-            }
-
             v2f vert (appdata v)
             {
-                Particle p = _Particles[GetId(v.uv1)];
+                Particle p = _Particles[v.id];
                 v2f o;
                 v.vertex.xyz *= p.Scale * _Scale;
                 v.vertex.xyz += p.OutPosition;
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 o.uv = TRANSFORM_TEX(v.uv, _MainTex);
+                o.psize = 5.0;
                 return o;
             }
 
