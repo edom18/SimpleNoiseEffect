@@ -3,7 +3,6 @@
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
-        _Color ("Color", Color) = (1, 1, 1, 1)
     }
     SubShader
     {
@@ -21,6 +20,8 @@
             struct Particle
             {
                 float3 Position;
+                float3 OutPosition;
+                float Scale;
             };
 
             struct appdata
@@ -39,6 +40,8 @@
             sampler2D _MainTex;
             float4 _MainTex_ST;
             float4 _Color;
+            float _Scale;
+
             StructuredBuffer<Particle> _Particles;
 
             inline int GetId(float2 uv)
@@ -50,8 +53,8 @@
             {
                 Particle p = _Particles[GetId(v.uv1)];
                 v2f o;
-                // v.vertex.xyz *= 0.1;
-                v.vertex.xyz += p.Position;
+                v.vertex.xyz *= p.Scale * _Scale;
+                v.vertex.xyz += p.OutPosition;
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 o.uv = TRANSFORM_TEX(v.uv, _MainTex);
                 return o;

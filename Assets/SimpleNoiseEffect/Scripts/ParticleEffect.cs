@@ -6,6 +6,8 @@ using UnityEngine;
 public struct Particle
 {
     public Vector3 Position;
+    public Vector3 OutPosition;
+    public float Scale;
     // public Vector3 Color;
 }
 
@@ -63,6 +65,8 @@ public class ParticleEffect : MonoBehaviour
     private void Initialize()
     {
         _material = new Material(_shader);
+        _material.SetFloat("_Scale", 0.1f);
+        _material.color = new Color(0.2f, 0.5f, 1f);
 
         // Calculate how many mesh can be included in one mesh.
         int particleNumPerMesh = MAX_VERTICES_IN_MESH / _mesh.vertexCount;
@@ -95,7 +99,7 @@ public class ParticleEffect : MonoBehaviour
 
     private Mesh GenerateCombinedMesh(Mesh baseMesh, int num)
     {
-        UnityEngine.Assertions.Assert.IsTrue(baseMesh.vertexCount * _maxParticleNum <= MAX_VERTICES_IN_MESH);
+        // UnityEngine.Assertions.Assert.IsTrue(baseMesh.vertexCount * _maxParticleNum <= MAX_VERTICES_IN_MESH);
 
         int[] meshIndices = baseMesh.GetIndices(0);
         int indNum = meshIndices.Length;

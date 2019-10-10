@@ -5,6 +5,8 @@
 struct Particle
 {
     float3 Position;
+    float3 OutPosition;
+    float Scale;
 };
 
 RWStructuredBuffer<Particle> _Particles;
@@ -38,5 +40,6 @@ void CurlNoiseMain(uint id : SV_DispatchThreadID)
     pos = CurlNoise(pos * _Scale);
     pos += ((pos * 2.0 - 1.0) * _Progress) * _Intensity;
 
-    _Particles[id].Position = pos;
+    _Particles[id].OutPosition = pos;
+    _Particles[id].Scale = 1.0 - _Progress;
 }
