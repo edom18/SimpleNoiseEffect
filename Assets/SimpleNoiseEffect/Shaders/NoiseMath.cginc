@@ -1,9 +1,26 @@
 ﻿#ifndef __NOISEMATH_CGINC__
 #define __NOISEMATH_CGINC__
 
+float rand(float x)
+{
+    return frac(sin(x) * 43758.5453);
+}
+
+float rand(float2 co)
+{
+    return frac(sin(dot(co.xy, float2(12.9898, 78.233))) * 43758.5453);
+}
+
 float rand(float3 co)
 {
     return frac(sin(dot(co.xyz, float3(12.9898, 78.233, 56.787))) * 43758.5453);
+}
+
+float2x2 rot(float a)
+{
+    float s = sin(a);
+    float c = cos(a);
+    return float2x2(c, -s, s, c);
 }
 
 float noise(float3 pos)

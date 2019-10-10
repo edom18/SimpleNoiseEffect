@@ -52,18 +52,6 @@
             static const float PI = 3.14159265;
             static const float PI2 = PI * 2.0;
 
-            float rand(float x)
-            {
-                return frac(sin(x) * 43758.5453);
-            }
-
-            float2x2 rot(float a)
-            {
-                float s = sin(a);
-                float c = cos(a);
-                return float2x2(c, -s, s, c);
-            }
-
             v2f vert (appdata v)
             {
                 v2f o;
