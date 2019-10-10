@@ -9,6 +9,7 @@ public struct Particle
     public Vector3 Position;
     public Vector3 OutPosition;
     public float Scale;
+    public Vector2 UV;
     // public Vector3 Color;
 }
 
@@ -20,10 +21,13 @@ public class ParticleEffect : MonoBehaviour
     [SerializeField]
     private Shader _shader = null;
 
+    [SerializeField]
+    private Mesh _targetMesh = null;
+
     #region ### Particle Parameters ###
     [Header("== Particle parameters ==")]
     [SerializeField]
-    private int _maxParticleNum = 1000;
+    private Material _material = null;
 
     [SerializeField]
     private float _size = 3f;
@@ -45,15 +49,15 @@ public class ParticleEffect : MonoBehaviour
     [SerializeField, Range(0, 1f)]
     private float _progress = 0;
 
-    private Material _material = null;
     private ComputeBuffer _particlesBuf = null;
-    private CommandBuffer _commandBuf = null;
     private int _kernelIndex = 0;
+    private Dictionary<Camera, CommandBuffer> _camBuffers = new Dictionary<Camera, CommandBuffer>();
+
+    private int ParticleNum => _targetMesh.vertexCount;
 
     private void Start()
     {
         Initialize();
-        Camera.main.AddCommandBuffer(CameraEvent.BeforeImageEffects, _commandBuf);
     }
 
     private void Update()
@@ -63,20 +67,45 @@ public class ParticleEffect : MonoBehaviour
 
     private void OnDestroy()
     {
-        _particlesBuf.Release();
+        CleanUp();
+    }
+
+    private void CleanUp()
+    {
+        foreach (var cam in _camBuffers)
+        {
+            if (cam.Key)
+            {
+                cam.Key.RemoveCommandBuffer(CameraEvent.BeforeImageEffects, cam.Value);
+            }
+        }
+
+        if (_particlesBuf != null)
+        {
+            _particlesBuf.Release();
+        }
+    }
+
+    private void OnWillRenderObject()
+    {
+        if (_camBuffers.ContainsKey(Camera.current))
+        {
+            return;
+        }
+
+        Camera cam = Camera.current;
+
+        CommandBuffer buf = CreateCommandBuffer();
+        cam.AddCommandBuffer(CameraEvent.BeforeImageEffects, buf);
+
+        _camBuffers.Add(cam, buf);
     }
 
     private void Initialize()
     {
-        _material = new Material(_shader);
-        _material.color = new Color(0.2f, 0.5f, 1f);
+        _particlesBuf = new ComputeBuffer(ParticleNum, Marshal.SizeOf(typeof(Particle)));
 
-        _commandBuf = new CommandBuffer();
-        _commandBuf.DrawProcedural(Matrix4x4.identity, _material, 0, MeshTopology.Points, _maxParticleNum);
-
-        _particlesBuf = new ComputeBuffer(_maxParticleNum, Marshal.SizeOf(typeof(Particle)));
-
-        Particle[] particles = GenerateParticles(_maxParticleNum);
+        Particle[] particles = GenerateParticles();
         _particlesBuf.SetData(particles);
 
         _kernelIndex = _computeShader.FindKernel("CurlNoiseMain");
@@ -90,25 +119,29 @@ public class ParticleEffect : MonoBehaviour
         _computeShader.SetFloat("_Rotate", _rotation);
         _computeShader.SetBuffer(_kernelIndex, "_Particles", _particlesBuf);
 
-        _computeShader.Dispatch(_kernelIndex, _maxParticleNum / 8, 1, 1);
+        _computeShader.Dispatch(_kernelIndex, ParticleNum / 8, 1, 1);
 
         _material.SetFloat("_Size", _size * (1.0f - _progress));
         _material.SetBuffer("_Particles", _particlesBuf);
     }
 
-    private Particle[] GenerateParticles(int particleNum)
+    private CommandBuffer CreateCommandBuffer()
     {
-        Particle[] particles = new Particle[particleNum];
+        CommandBuffer buf = new CommandBuffer();
+        buf.DrawProcedural(Matrix4x4.identity, _material, 0, MeshTopology.Points, ParticleNum);
+        return buf;
+    }
 
-        for (int i = 0; i < particleNum; i++)
+    private Particle[] GenerateParticles()
+    {
+        Particle[] particles = new Particle[_targetMesh.vertexCount];
+
+        for (int i = 0; i < _targetMesh.vertexCount; i++)
         {
-            float x = Random.Range(-0.1f, 0.1f);
-            float y = Random.Range(-0.1f, 0.1f);
-            float z = Random.Range(-0.1f, 0.1f);
-
             Particle p = new Particle
             {
-                Position = new Vector3(x, y, z),
+                Position = _targetMesh.vertices[i],
+                UV = _targetMesh.uv[i],
             };
 
             particles[i] = p;

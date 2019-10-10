@@ -3,6 +3,8 @@
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
+        _Color ("Color", Color) = (1, 1, 1, 1)
+        _Size ("Size", Float) = 3.0
     }
     SubShader
     {
@@ -22,14 +24,7 @@
                 float3 Position;
                 float3 OutPosition;
                 float Scale;
-            };
-
-            struct appdata
-            {
-                float4 vertex : POSITION;
-                float2 uv : TEXCOORD0;
-                float2 uv1 : TEXCOORD1;
-                uint id: SV_VertexID;
+                float2 UV;
             };
 
             struct v2f
@@ -46,14 +41,13 @@
 
             StructuredBuffer<Particle> _Particles;
 
-            v2f vert (appdata v)
+            v2f vert (uint id: SV_VertexID)
             {
-                Particle p = _Particles[v.id];
+                Particle p = _Particles[id];
 
                 v2f o;
-                v.vertex.xyz += p.OutPosition;
-                o.vertex = UnityObjectToClipPos(v.vertex);
-                o.uv = TRANSFORM_TEX(v.uv, _MainTex);
+                o.vertex = UnityObjectToClipPos(p.OutPosition);
+                o.uv = p.UV;
                 o.psize = _Size * p.Scale;
                 return o;
             }
