@@ -1,0 +1,42 @@
+﻿#pragma kernel CurlNoiseMain
+
+#include "NoiseMath.cginc"
+
+struct Particle
+{
+    float3 Position;
+};
+
+RWStructuredBuffer<Particle> _Particles;
+
+float _Progress;
+float _Intensity;
+float _Rotate;
+float _Scale;
+
+static const float PI = 3.14159265;
+static const float PI2 = PI * 2.0;
+
+float rand(float x)
+{
+    return frac(sin(x) * 43758.5453);
+}
+
+float2x2 rot(float a)
+{
+    float s = sin(a);
+    float c = cos(a);
+    return float2x2(c, -s, s, c);
+}
+
+[numthreads(8,1,1)]
+void CurlNoiseMain(uint id : SV_DispatchThreadID)
+{
+    float3 pos = _Particles[id].Position;
+
+    pos.xz = mul(pos.xz, rot(_Progress * PI2 * _Rotate));
+    pos = CurlNoise(pos * _Scale);
+    pos += ((pos * 2.0 - 1.0) * _Progress) * _Intensity;
+
+    _Particles[id].Position = pos;
+}
