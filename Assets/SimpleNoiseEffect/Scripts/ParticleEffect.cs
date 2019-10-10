@@ -20,26 +20,30 @@ public class ParticleEffect : MonoBehaviour
     [SerializeField]
     private Shader _shader = null;
 
-    [SerializeField]
-    private Mesh _mesh = null;
-
-    #region ### Noise Parameters ###
-    [Header("Noise parameters")]
+    #region ### Particle Parameters ###
+    [Header("== Particle parameters ==")]
     [SerializeField]
     private int _maxParticleNum = 1000;
 
     [SerializeField]
-    private float _scale = 1f;
+    private float _size = 3f;
+    #endregion ### Particle Parameters ###
+
+    #region ### Noise Parameters ###
+    [Header("== Noise parameters ==")]
+    [SerializeField]
+    private float _noiseScale = 1f;
 
     [SerializeField]
     private float _rotation = 0.1f;
 
     [SerializeField]
     private float _intensity = 1f;
+    #endregion ### Noise Parameters ###
 
+    [Header("== Control ==")]
     [SerializeField, Range(0, 1f)]
     private float _progress = 0;
-    #endregion ### Noise Parameters ###
 
     private Material _material = null;
     private ComputeBuffer _particlesBuf = null;
@@ -65,7 +69,6 @@ public class ParticleEffect : MonoBehaviour
     private void Initialize()
     {
         _material = new Material(_shader);
-        _material.SetFloat("_Scale", 0.1f);
         _material.color = new Color(0.2f, 0.5f, 1f);
 
         _commandBuf = new CommandBuffer();
@@ -81,7 +84,7 @@ public class ParticleEffect : MonoBehaviour
 
     private void UpdatePosition()
     {
-        _computeShader.SetFloat("_Scale", _scale);
+        _computeShader.SetFloat("_NoiseScale", _noiseScale);
         _computeShader.SetFloat("_Progress", _progress);
         _computeShader.SetFloat("_Intensity", _intensity);
         _computeShader.SetFloat("_Rotate", _rotation);
@@ -89,6 +92,7 @@ public class ParticleEffect : MonoBehaviour
 
         _computeShader.Dispatch(_kernelIndex, _maxParticleNum / 8, 1, 1);
 
+        _material.SetFloat("_Size", _size * (1.0f - _progress));
         _material.SetBuffer("_Particles", _particlesBuf);
     }
 

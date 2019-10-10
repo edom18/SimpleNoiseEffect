@@ -42,19 +42,19 @@
             sampler2D _MainTex;
             float4 _MainTex_ST;
             float4 _Color;
-            float _Scale;
+            float _Size;
 
             StructuredBuffer<Particle> _Particles;
 
             v2f vert (appdata v)
             {
                 Particle p = _Particles[v.id];
+
                 v2f o;
-                v.vertex.xyz *= p.Scale * _Scale;
                 v.vertex.xyz += p.OutPosition;
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 o.uv = TRANSFORM_TEX(v.uv, _MainTex);
-                o.psize = 5.0;
+                o.psize = _Size * p.Scale;
                 return o;
             }
 

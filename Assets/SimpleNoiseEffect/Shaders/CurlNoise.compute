@@ -14,7 +14,7 @@ RWStructuredBuffer<Particle> _Particles;
 float _Progress;
 float _Intensity;
 float _Rotate;
-float _Scale;
+float _NoiseScale;
 
 static const float PI = 3.14159265;
 static const float PI2 = PI * 2.0;
@@ -25,7 +25,7 @@ void CurlNoiseMain(uint id : SV_DispatchThreadID)
     float3 pos = _Particles[id].Position;
 
     pos.xz = mul(pos.xz, rot(_Progress * PI2 * _Rotate));
-    pos = CurlNoise(pos * _Scale);
+    pos = CurlNoise(pos * _NoiseScale);
     pos += ((pos * 2.0 - 1.0) * _Progress) * _Intensity;
 
     _Particles[id].OutPosition = pos;
