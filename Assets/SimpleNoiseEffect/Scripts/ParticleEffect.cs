@@ -116,7 +116,7 @@ public class ParticleEffect : MonoBehaviour
 
     private void CaluculateNum()
     {
-        _particleNumRoot = (int)Mathf.Ceil(Mathf.Sqrt((float)_targetMesh.vertexCount));
+        _particleNumRoot = (int)Mathf.Ceil(Mathf.Sqrt((float)ParticleNum));
     }
 
     private void UpdatePosition()
