@@ -49,11 +49,14 @@ public class ParticleEffect : MonoBehaviour
     [SerializeField, Range(0, 1f)]
     private float _progress = 0;
 
+    [SerializeField]
+    private int _maxNum = 1000;
+
     private ComputeBuffer _particlesBuf = null;
     private int _kernelIndex = 0;
     private Dictionary<Camera, CommandBuffer> _camBuffers = new Dictionary<Camera, CommandBuffer>();
 
-    private int ParticleNum => _targetMesh.vertexCount;
+    private int ParticleNum => _maxNum; // _targetMesh.vertexCount;
     private int _particleNumRoot = 0;
 
     private void Start()
@@ -156,15 +159,26 @@ public class ParticleEffect : MonoBehaviour
         {
             int idx = i % _targetMesh.vertexCount;
 
-            Particle p = new Particle
-            {
-                Position = _targetMesh.vertices[idx],
-                UV = _targetMesh.uv[idx],
-            };
+            Particle p = CreateParticle();
 
             particles[i] = p;
         }
 
         return particles;
+    }
+
+    private Particle CreateParticle()
+    {
+        return new Particle
+        {
+            Position = Random.insideUnitSphere,
+            UV = new Vector2(0, 0),
+        };
+
+        // return new Particle
+        // {
+        //     Position = _targetMesh.vertices[idx],
+        //     UV = _targetMesh.uv[idx],
+        // };
     }
 }
