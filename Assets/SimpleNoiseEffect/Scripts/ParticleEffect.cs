@@ -66,6 +66,7 @@ public class ParticleEffect : MonoBehaviour
 
     private void Update()
     {
+        _progress = Mathf.Sin(Time.time) * Mathf.Sin(Time.time);
         UpdatePosition();
     }
 
@@ -157,7 +158,7 @@ public class ParticleEffect : MonoBehaviour
 
         for (int i = 0; i < particles.Length; i++)
         {
-            int idx = i % _targetMesh.vertexCount;
+            //int idx = i % _targetMesh.vertexCount;
 
             Particle p = CreateParticle();
 
