@@ -16,20 +16,22 @@ float _Progress;
 float _Intensity;
 float _Rotate;
 float _NoiseScale;
+int _PrticleNumPerRow;
 
 static const float PI = 3.14159265;
 static const float PI2 = PI * 2.0;
 
-[numthreads(8,1,1)]
-void CurlNoiseMain(uint id : SV_DispatchThreadID)
+[numthreads(8,8,1)]
+void CurlNoiseMain(uint2 id : SV_DispatchThreadID)
 {
-    float3 pos = _Particles[id].Position;
+    int i = id.y * _PrticleNumPerRow + id.x;
+    float3 pos = _Particles[i].Position;
 
     float3 rpos = pos;
     rpos.xz = mul(rpos.xz, rot(_Progress * PI2 * _Rotate));
     rpos = CurlNoise(rpos * _NoiseScale);
     pos += ((rpos * 2.0 - 1.0) * _Progress) * _Intensity;
 
-    _Particles[id].OutPosition = pos;
-    _Particles[id].Scale = 1.0 - _Progress;
+    _Particles[i].OutPosition = pos;
+    _Particles[i].Scale = 1.0 - _Progress;
 }

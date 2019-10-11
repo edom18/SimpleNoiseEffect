@@ -54,6 +54,7 @@ public class ParticleEffect : MonoBehaviour
     private Dictionary<Camera, CommandBuffer> _camBuffers = new Dictionary<Camera, CommandBuffer>();
 
     private int ParticleNum => _targetMesh.vertexCount;
+    private int _particleNumRoot = 0;
 
     private void Start()
     {
@@ -103,12 +104,19 @@ public class ParticleEffect : MonoBehaviour
 
     private void Initialize()
     {
-        _particlesBuf = new ComputeBuffer(ParticleNum, Marshal.SizeOf(typeof(Particle)));
+        CaluculateNum();
+
+        _particlesBuf = new ComputeBuffer(_particleNumRoot * _particleNumRoot, Marshal.SizeOf(typeof(Particle)));
 
         Particle[] particles = GenerateParticles();
         _particlesBuf.SetData(particles);
 
         _kernelIndex = _computeShader.FindKernel("CurlNoiseMain");
+    }
+
+    private void CaluculateNum()
+    {
+        _particleNumRoot = (int)Mathf.Ceil(Mathf.Sqrt((float)_targetMesh.vertexCount));
     }
 
     private void UpdatePosition()
@@ -117,9 +125,10 @@ public class ParticleEffect : MonoBehaviour
         _computeShader.SetFloat("_Progress", _progress);
         _computeShader.SetFloat("_Intensity", _intensity);
         _computeShader.SetFloat("_Rotate", _rotation);
+        _computeShader.SetInt("_PrticleNumPerRow", _particleNumRoot);
         _computeShader.SetBuffer(_kernelIndex, "_Particles", _particlesBuf);
 
-        _computeShader.Dispatch(_kernelIndex, ParticleNum / 8, 1, 1);
+        _computeShader.Dispatch(_kernelIndex, _particleNumRoot / 8, _particleNumRoot / 8, 1);
 
         _material.SetFloat("_Size", _size * (1.0f - _progress));
         _material.SetBuffer("_Particles", _particlesBuf);
@@ -128,20 +137,29 @@ public class ParticleEffect : MonoBehaviour
     private CommandBuffer CreateCommandBuffer()
     {
         CommandBuffer buf = new CommandBuffer();
-        buf.DrawProcedural(Matrix4x4.identity, _material, 0, MeshTopology.Points, ParticleNum);
+        buf.DrawProcedural(transform.localToWorldMatrix, _material, 0, MeshTopology.Points, ParticleNum);
         return buf;
     }
 
+    /// <summary>
+    /// Generate particles.
+    /// 
+    /// This method may create over the vertex count. Because the buffer will be created by square value from the vertex count.
+    /// So the particles length will be power of the value.
+    /// </summary>
+    /// <returns></returns>
     private Particle[] GenerateParticles()
     {
-        Particle[] particles = new Particle[_targetMesh.vertexCount];
+        Particle[] particles = new Particle[_particleNumRoot * _particleNumRoot];
 
-        for (int i = 0; i < _targetMesh.vertexCount; i++)
+        for (int i = 0; i < particles.Length; i++)
         {
+            int idx = i % _targetMesh.vertexCount;
+
             Particle p = new Particle
             {
-                Position = _targetMesh.vertices[i],
-                UV = _targetMesh.uv[i],
+                Position = _targetMesh.vertices[idx],
+                UV = _targetMesh.uv[idx],
             };
 
             particles[i] = p;
