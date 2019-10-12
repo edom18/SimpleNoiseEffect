@@ -33,3 +33,14 @@ Intensity means that how far applying to the value to each vertex. If you change
 Put the prefab that named "ParticleEffect" into your scene. Then, you can set some parameters for displaying the particle like below.
 
 ![Howto demo](./howto.gif)
+
+### Animation
+
+You can also use animation with `Progress` method in `ParticleEffect` component like below.
+
+```C#
+ParticleEffect _particleEffect;
+_particleEffect.Progress(0.5f);
+```
+
+You can see the demo in `SampleScene` via `ParticleDemo` component on the `ParticleEffect` prefab.
