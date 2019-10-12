@@ -10,14 +10,12 @@ public struct Particle
     public Vector3 OutPosition;
     public float Scale;
     public Vector2 UV;
-    // public Vector3 Color;
 }
 
 public class ParticleEffect : MonoBehaviour
 {
     struct PropertyIdDef
     {
-
         public int NoiseScale;
         public int Progress;
         public int Intensity;
@@ -66,8 +64,9 @@ public class ParticleEffect : MonoBehaviour
 
     private PropertyIdDef _propertyIdDef = default;
 
-    private int _kernelIndex = 0;
     private int ParticleNum => _targetMesh.vertexCount;
+
+    private int _kernelIndex = 0;
     private int _particleNumRoot = 0;
 
     #region ### MonoBehaviour ###
@@ -88,6 +87,11 @@ public class ParticleEffect : MonoBehaviour
 
     private void OnWillRenderObject()
     {
+        if (_targetMesh == null)
+        {
+            return;
+        }
+
         if (_camBuffers.ContainsKey(Camera.current))
         {
             return;
@@ -203,6 +207,11 @@ public class ParticleEffect : MonoBehaviour
     /// </summary>
     private void CreateBuffers()
     {
+        if (_targetMesh == null)
+        {
+            return;
+        }
+
         CaluculateNum();
 
         _particlesBuf = new ComputeBuffer(_particleNumRoot * _particleNumRoot, Marshal.SizeOf(typeof(Particle)));
@@ -227,6 +236,11 @@ public class ParticleEffect : MonoBehaviour
     /// </summary>
     private void UpdatePosition()
     {
+        if (_targetMesh == null)
+        {
+            return;
+        }
+
         _computeShader.SetFloat(_propertyIdDef.NoiseScale, _noiseScale);
         _computeShader.SetFloat(_propertyIdDef.Progress, _progress);
         _computeShader.SetFloat(_propertyIdDef.Intensity, _intensity);
