@@ -76,11 +76,6 @@ float3 Pnoise(float3 vec)
     return float3(x, y, z);
 }
 
-float3 SamplePotential(float3 vec)
-{
-    return Pnoise(vec);
-}
-
 float3 CurlNoise(float3 pos)
 {
     const float e = 1e-4f;
@@ -91,12 +86,12 @@ float3 CurlNoise(float3 pos)
     const float3 dy = float3(0.0, e, 0.0);
     const float3 dz = float3(0.0, 0.0, e);
 
-    float3 p_x0 = SamplePotential(pos - dx);
-    float3 p_x1 = SamplePotential(pos + dx);
-    float3 p_y0 = SamplePotential(pos - dy);
-    float3 p_y1 = SamplePotential(pos + dy);
-    float3 p_z0 = SamplePotential(pos - dz);
-    float3 p_z1 = SamplePotential(pos + dz);
+    float3 p_x0 = Pnoise(pos - dx);
+    float3 p_x1 = Pnoise(pos + dx);
+    float3 p_y0 = Pnoise(pos - dy);
+    float3 p_y1 = Pnoise(pos + dy);
+    float3 p_z0 = Pnoise(pos - dz);
+    float3 p_z1 = Pnoise(pos + dz);
 
     float x = (p_y1.z - p_y0.z) - (p_z1.y - p_z0.y);
     float y = (p_z1.x - p_z0.x) - (p_x1.z - p_x0.z);
