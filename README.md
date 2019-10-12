@@ -2,6 +2,10 @@
 
 This project is simple noise effect for Unity. This project use a compute shader and use point mesh topology to render. So this project will work on OpenGL platforms well. Of cause DirectX platform is supported but the platform has no point rendering.
 
+This project provide an effect like below.
+
+![Demo](./demo.gif)
+
 ## How to use
 
 Put a prefab that named "ParticleEffect" into your scene. Then, you can set some parameters for displaying the particle.
