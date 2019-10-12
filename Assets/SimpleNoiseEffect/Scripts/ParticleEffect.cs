@@ -135,8 +135,13 @@ namespace SNE
             _material.mainTexture = texture;
         }
 
+        /// <summary>
+        /// Control progress. This method can take 0 - 1 value.
+        /// </summary>
+        /// <param name="t">Progress.</param>
         public void Progres(float t)
         {
+            t = Mathf.Clamp01(t);
             _progress = t;
         }
 
