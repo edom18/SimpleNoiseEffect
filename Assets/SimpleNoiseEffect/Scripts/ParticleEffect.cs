@@ -56,6 +56,7 @@ public class ParticleEffect : MonoBehaviour
     private int ParticleNum => _targetMesh.vertexCount;
     private int _particleNumRoot = 0;
 
+    #region ### MonoBehaviour ###
     private void Start()
     {
         Initialize();
@@ -69,22 +70,6 @@ public class ParticleEffect : MonoBehaviour
     private void OnDestroy()
     {
         CleanUp();
-    }
-
-    private void CleanUp()
-    {
-        foreach (var cam in _camBuffers)
-        {
-            if (cam.Key)
-            {
-                cam.Key.RemoveCommandBuffer(CameraEvent.BeforeImageEffects, cam.Value);
-            }
-        }
-
-        if (_particlesBuf != null)
-        {
-            _particlesBuf.Release();
-        }
     }
 
     private void OnWillRenderObject()
@@ -101,8 +86,50 @@ public class ParticleEffect : MonoBehaviour
 
         _camBuffers.Add(cam, buf);
     }
+    #endregion ### MonoBehaviour ###
 
+    /// <summary>
+    /// Clean up command buffers and compute buffers.
+    /// </summary>
+    private void CleanUp()
+    {
+        foreach (var cam in _camBuffers)
+        {
+            if (cam.Key)
+            {
+                cam.Key.RemoveCommandBuffer(CameraEvent.BeforeImageEffects, cam.Value);
+            }
+        }
+
+        if (_particlesBuf != null)
+        {
+            _particlesBuf.Release();
+        }
+    }
+
+    /// <summary>
+    /// Initialize this component.
+    /// 
+    /// Create buffers and get kernel indices.
+    /// </summary>
     private void Initialize()
+    {
+        CreateBuffers();
+        _kernelIndex = _computeShader.FindKernel("CurlNoiseMain");
+    }
+
+    /// <summary>
+    /// Caluculate number from particle count to a root value.
+    /// </summary>
+    private void CaluculateNum()
+    {
+        _particleNumRoot = (int)Mathf.Ceil(Mathf.Sqrt((float)ParticleNum));
+    }
+
+    /// <summary>
+    /// Create buffers for using particles.
+    /// </summary>
+    private void CreateBuffers()
     {
         CaluculateNum();
 
@@ -110,15 +137,22 @@ public class ParticleEffect : MonoBehaviour
 
         Particle[] particles = GenerateParticles();
         _particlesBuf.SetData(particles);
-
-        _kernelIndex = _computeShader.FindKernel("CurlNoiseMain");
     }
 
-    private void CaluculateNum()
+    /// <summary>
+    /// Create a command buffer for drawing points.
+    /// </summary>
+    /// <returns>The command buffer.</returns>
+    private CommandBuffer CreateCommandBuffer()
     {
-        _particleNumRoot = (int)Mathf.Ceil(Mathf.Sqrt((float)ParticleNum));
+        CommandBuffer buf = new CommandBuffer();
+        buf.DrawProcedural(transform.localToWorldMatrix, _material, 0, MeshTopology.Points, ParticleNum);
+        return buf;
     }
 
+    /// <summary>
+    /// Update the particles position.
+    /// </summary>
     private void UpdatePosition()
     {
         _computeShader.SetFloat("_NoiseScale", _noiseScale);
@@ -134,12 +168,6 @@ public class ParticleEffect : MonoBehaviour
         _material.SetBuffer("_Particles", _particlesBuf);
     }
 
-    private CommandBuffer CreateCommandBuffer()
-    {
-        CommandBuffer buf = new CommandBuffer();
-        buf.DrawProcedural(transform.localToWorldMatrix, _material, 0, MeshTopology.Points, ParticleNum);
-        return buf;
-    }
 
     /// <summary>
     /// Generate particles.
