@@ -6,14 +6,13 @@ This project provide an effect like below.
 
 ![Demo](./demo.gif)
 
-## How to use
 
-Put a prefab that named "ParticleEffect" into your scene. Then, you can set some parameters for displaying the particle.
-You can set it on the inspector like below.
-
-![Inspector](./inspector.png)
 
 ## Parametes
+
+You can set some parameters on the inspector like below.
+
+![Inspector](./inspector.png)
 
 ### Noise Scale
 
@@ -26,3 +25,11 @@ Rotation means that rotate each vertex before applying curl noise. So if you cha
 ### Intensity
 
 Intensity means that how far applying to the value to each vertex. If you change the value, then all vertices are moved more far from origin.
+
+
+
+## How to use
+
+Put the prefab that named "ParticleEffect" into your scene. Then, you can set some parameters for displaying the particle like below.
+
+![Howto demo](./howto.gif)
