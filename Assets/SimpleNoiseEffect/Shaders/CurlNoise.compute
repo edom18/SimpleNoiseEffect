@@ -16,6 +16,7 @@ float _Progress;
 float _Intensity;
 float _Rotate;
 float _NoiseScale;
+float3 _Force;
 int _ParticleNumPerRow;
 
 static const float PI = 3.14159265;
@@ -31,6 +32,7 @@ void CurlNoiseMain(uint2 id : SV_DispatchThreadID)
     rpos.xz = mul(rpos.xz, rot(_Progress * PI2 * _Rotate));
     rpos = CurlNoise(rpos * _NoiseScale);
     pos += ((rpos * 2.0 - 1.0) * _Progress) * _Intensity;
+    pos += _Force * _Intensity * _Progress;
 
     _Particles[i].OutPosition = pos;
     _Particles[i].Scale = 1.0 - _Progress;

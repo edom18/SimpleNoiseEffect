@@ -34,6 +34,7 @@ namespace SNE
             public int ParticleNumPerRow;
             public int Particles;
             public int Size;
+            public int Force;
         }
 
         [SerializeField]
@@ -62,6 +63,9 @@ namespace SNE
 
         [SerializeField]
         private float _intensity = 1f;
+
+        [SerializeField]
+        private Vector3 _force = Vector3.zero;
         #endregion ### Noise Parameters ###
 
         [Header("== Control ==")]
@@ -203,6 +207,7 @@ namespace SNE
                 ParticleNumPerRow = Shader.PropertyToID("_ParticleNumPerRow"),
                 Particles = Shader.PropertyToID("_Particles"),
                 Size = Shader.PropertyToID("_Size"),
+                Force = Shader.PropertyToID("_Force"),
             };
         }
 
@@ -265,6 +270,7 @@ namespace SNE
             _computeShader.SetFloat(_propertyIdDef.Progress, _progress);
             _computeShader.SetFloat(_propertyIdDef.Intensity, _intensity);
             _computeShader.SetFloat(_propertyIdDef.Rotate, _rotation);
+            _computeShader.SetVector(_propertyIdDef.Force, _force);
             _computeShader.SetInt(_propertyIdDef.ParticleNumPerRow, _particleNumRoot);
             _computeShader.SetBuffer(_kernelIndex, _propertyIdDef.Particles, _particlesBuf);
 
