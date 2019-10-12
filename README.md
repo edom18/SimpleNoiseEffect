@@ -14,6 +14,10 @@ You can set some parameters on the inspector like below.
 
 ![Inspector](./inspector.png)
 
+### Size
+
+Size means a point size.
+
 ### Noise Scale
 
 Noise scale means PerlinNoise scale. If you change the value, noise will change looking.
@@ -26,7 +30,9 @@ Rotation means that rotate each vertex before applying curl noise. So if you cha
 
 Intensity means that how far applying to the value to each vertex. If you change the value, then all vertices are moved more far from origin.
 
+### Force
 
+Force means like force field. If you change this parameter, then the particle is moved belongs to the `Force` vector.
 
 ## How to use
 
