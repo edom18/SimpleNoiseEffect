@@ -15,6 +15,18 @@ public struct Particle
 
 public class ParticleEffect : MonoBehaviour
 {
+    struct PropertyIdDef
+    {
+
+        public int NoiseScale;
+        public int Progress;
+        public int Intensity;
+        public int Rotate;
+        public int ParticleNumPerRow;
+        public int Particles;
+        public int Size;
+    }
+
     [SerializeField]
     private ComputeShader _computeShader = null;
 
@@ -50,9 +62,11 @@ public class ParticleEffect : MonoBehaviour
     private float _progress = 0;
 
     private ComputeBuffer _particlesBuf = null;
-    private int _kernelIndex = 0;
     private Dictionary<Camera, CommandBuffer> _camBuffers = new Dictionary<Camera, CommandBuffer>();
 
+    private PropertyIdDef _propertyIdDef = default;
+
+    private int _kernelIndex = 0;
     private int ParticleNum => _targetMesh.vertexCount;
     private int _particleNumRoot = 0;
 
@@ -114,8 +128,23 @@ public class ParticleEffect : MonoBehaviour
     /// </summary>
     private void Initialize()
     {
+        CreatePropertyId();
         CreateBuffers();
         _kernelIndex = _computeShader.FindKernel("CurlNoiseMain");
+    }
+
+    private void CreatePropertyId()
+    {
+        _propertyIdDef = new PropertyIdDef
+        {
+            NoiseScale = Shader.PropertyToID("_NoiseScale"),
+            Progress = Shader.PropertyToID("_Progress"),
+            Intensity = Shader.PropertyToID("_Intensity"),
+            Rotate = Shader.PropertyToID("_Rotate"),
+            ParticleNumPerRow = Shader.PropertyToID("_ParticleNumPerRow"),
+            Particles = Shader.PropertyToID("_Particles"),
+            Size = Shader.PropertyToID("_Size"),
+        };
     }
 
     /// <summary>
@@ -155,17 +184,17 @@ public class ParticleEffect : MonoBehaviour
     /// </summary>
     private void UpdatePosition()
     {
-        _computeShader.SetFloat("_NoiseScale", _noiseScale);
-        _computeShader.SetFloat("_Progress", _progress);
-        _computeShader.SetFloat("_Intensity", _intensity);
-        _computeShader.SetFloat("_Rotate", _rotation);
-        _computeShader.SetInt("_PrticleNumPerRow", _particleNumRoot);
-        _computeShader.SetBuffer(_kernelIndex, "_Particles", _particlesBuf);
+        _computeShader.SetFloat(_propertyIdDef.NoiseScale, _noiseScale);
+        _computeShader.SetFloat(_propertyIdDef.Progress, _progress);
+        _computeShader.SetFloat(_propertyIdDef.Intensity, _intensity);
+        _computeShader.SetFloat(_propertyIdDef.Rotate, _rotation);
+        _computeShader.SetInt(_propertyIdDef.ParticleNumPerRow, _particleNumRoot);
+        _computeShader.SetBuffer(_kernelIndex, _propertyIdDef.Particles, _particlesBuf);
 
         _computeShader.Dispatch(_kernelIndex, _particleNumRoot / 8, _particleNumRoot / 8, 1);
 
-        _material.SetFloat("_Size", _size * (1.0f - _progress));
-        _material.SetBuffer("_Particles", _particlesBuf);
+        _material.SetFloat(_propertyIdDef.Size, _size * (1.0f - _progress));
+        _material.SetBuffer(_propertyIdDef.Particles, _particlesBuf);
     }
 
 
