@@ -8,7 +8,7 @@ This project provide an effect like below.
 
 
 
-## Parametes
+## Parameters
 
 You can set some parameters on the inspector like below.
 
