@@ -135,6 +135,11 @@ namespace SNE
             _material.mainTexture = texture;
         }
 
+        public void Progres(float t)
+        {
+            _progress = t;
+        }
+
         /// <summary>
         /// Clean up command buffers and compute buffers.
         /// </summary>
