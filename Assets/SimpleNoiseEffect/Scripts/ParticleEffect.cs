@@ -103,6 +103,25 @@ public class ParticleEffect : MonoBehaviour
     #endregion ### MonoBehaviour ###
 
     /// <summary>
+    /// Set a mesh to visualize vertices.
+    /// </summary>
+    /// <param name="mesh">Visualize target.</param>
+    public void SetMesh(Mesh mesh)
+    {
+        _targetMesh = mesh;
+        ResetBuffers();
+    }
+
+    /// <summary>
+    /// Set a texture to paint for vertices.
+    /// </summary>
+    /// <param name="texture">Paint texture.</param>
+    public void SetTexture(Texture texture)
+    {
+        _material.mainTexture = texture;
+    }
+
+    /// <summary>
     /// Clean up command buffers and compute buffers.
     /// </summary>
     private void CleanUp()
@@ -114,6 +133,8 @@ public class ParticleEffect : MonoBehaviour
                 cam.Key.RemoveCommandBuffer(CameraEvent.BeforeImageEffects, cam.Value);
             }
         }
+
+        _camBuffers.Clear();
 
         if (_particlesBuf != null)
         {
@@ -129,8 +150,19 @@ public class ParticleEffect : MonoBehaviour
     private void Initialize()
     {
         CreatePropertyId();
+        GetKernelIndies();
+        ResetBuffers();
+    }
+
+    /// <summary>
+    /// Reset buffers.
+    /// 
+    /// If the buffers already exist, it will be released for next allocating buffers.
+    /// </summary>
+    private void ResetBuffers()
+    {
+        CleanUp();
         CreateBuffers();
-        _kernelIndex = _computeShader.FindKernel("CurlNoiseMain");
     }
 
     /// <summary>
@@ -151,11 +183,19 @@ public class ParticleEffect : MonoBehaviour
     }
 
     /// <summary>
+    /// Get all kernel indices.
+    /// </summary>
+    private void GetKernelIndies()
+    {
+        _kernelIndex = _computeShader.FindKernel("CurlNoiseMain");
+    }
+
+    /// <summary>
     /// Caluculate number from particle count to a root value.
     /// </summary>
     private void CaluculateNum()
     {
-        _particleNumRoot = (int)Mathf.Ceil(Mathf.Sqrt((float)ParticleNum));
+        _particleNumRoot = (int)Mathf.Ceil(Mathf.Sqrt(ParticleNum));
     }
 
     /// <summary>
