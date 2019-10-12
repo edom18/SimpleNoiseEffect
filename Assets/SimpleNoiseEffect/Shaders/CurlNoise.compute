@@ -16,7 +16,7 @@ float _Progress;
 float _Intensity;
 float _Rotate;
 float _NoiseScale;
-int _PrticleNumPerRow;
+int _ParticleNumPerRow;
 
 static const float PI = 3.14159265;
 static const float PI2 = PI * 2.0;
@@ -24,7 +24,7 @@ static const float PI2 = PI * 2.0;
 [numthreads(8,8,1)]
 void CurlNoiseMain(uint2 id : SV_DispatchThreadID)
 {
-    int i = id.y * _PrticleNumPerRow + id.x;
+    int i = id.y * _ParticleNumPerRow + id.x;
     float3 pos = _Particles[i].Position;
 
     float3 rpos = pos;
