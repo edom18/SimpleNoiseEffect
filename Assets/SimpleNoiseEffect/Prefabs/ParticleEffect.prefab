@@ -53,6 +53,7 @@ MonoBehaviour:
   _noiseScale: 0.3
   _rotation: 0.1
   _intensity: 1
+  _force: {x: 0, y: 3, z: 0}
   _progress: 0
 --- !u!23 &7159549880592174546
 MeshRenderer:
