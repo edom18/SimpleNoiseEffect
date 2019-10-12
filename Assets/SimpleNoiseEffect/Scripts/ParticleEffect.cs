@@ -133,6 +133,9 @@ public class ParticleEffect : MonoBehaviour
         _kernelIndex = _computeShader.FindKernel("CurlNoiseMain");
     }
 
+    /// <summary>
+    /// Create all property IDs for using the particles
+    /// </summary>
     private void CreatePropertyId()
     {
         _propertyIdDef = new PropertyIdDef
@@ -196,7 +199,6 @@ public class ParticleEffect : MonoBehaviour
         _material.SetFloat(_propertyIdDef.Size, _size * (1.0f - _progress));
         _material.SetBuffer(_propertyIdDef.Particles, _particlesBuf);
     }
-
 
     /// <summary>
     /// Generate particles.
